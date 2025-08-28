@@ -4244,9 +4244,7 @@ function initResourceSelect(
     const selectBtn = selectBtnId ? document.getElementById(selectBtnId) : null;
 
     if (!container) {
-        console.warn(
-            `Resource select elements not found: ${selectId}`,
-        );
+        console.warn(`Resource select elements not found: ${selectId}`);
         return;
     }
 
@@ -4255,8 +4253,7 @@ function initResourceSelect(
     function update() {
         try {
             const checked = Array.from(checkboxes).filter((cb) => cb.checked);
-            const count = checked.length;
-
+            // const count = checked.length;
         } catch (error) {
             console.error("Error updating resource select:", error);
         }
@@ -4291,9 +4288,7 @@ function initPromptSelect(
     const selectBtn = selectBtnId ? document.getElementById(selectBtnId) : null;
 
     if (!container) {
-        console.warn(
-            `Prompt select elements not found: ${selectId}`,
-        );
+        console.warn(`Prompt select elements not found: ${selectId}`);
         return;
     }
 
@@ -4302,8 +4297,7 @@ function initPromptSelect(
     function update() {
         try {
             const checked = Array.from(checkboxes).filter((cb) => cb.checked);
-            const count = checked.length;
-
+            // const count = checked.length;
         } catch (error) {
             console.error("Error updating prompt select:", error);
         }
