@@ -644,8 +644,10 @@ class PromptService:
 
                 raise PromptNotFoundError(f"Prompt not found: {name}")
 
-            if prompt_update.name is not None:
-                prompt.name = prompt_update.name
+            if prompt_update.custom_name is not None:
+                prompt.custom_name = prompt_update.custom_name
+            if prompt_update.displayName is not None:
+                prompt.display_name = prompt_update.displayName
             if prompt_update.description is not None:
                 prompt.description = prompt_update.description
             if prompt_update.template is not None:

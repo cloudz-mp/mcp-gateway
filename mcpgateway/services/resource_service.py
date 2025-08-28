@@ -749,8 +749,10 @@ class ResourceService:
                 raise ResourceNotFoundError(f"Resource not found: {uri}")
 
             # Update fields if provided
-            if resource_update.name is not None:
-                resource.name = resource_update.name
+            if resource_update.custom_name is not None:
+                resource.custom_name = resource_update.custom_name
+            if resource_update.displayName is not None:
+                resource.display_name = resource_update.displayName
             if resource_update.description is not None:
                 resource.description = resource_update.description
             if resource_update.mime_type is not None:
