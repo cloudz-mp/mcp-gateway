@@ -126,7 +126,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def refresh_slugs_on_startup():
-    """Refresh slugs for all gateways and names of tools on startup."""
+    """Refresh slugs for all gateways and names of tools, resources and prompts on startup."""
 
     with SessionLocal() as session:
         gateways = session.query(Gateway).all()
@@ -143,6 +143,14 @@ def refresh_slugs_on_startup():
         for tool in tools:
             session.expire(tool, ["gateway"])
 
+        resources = session.query(Resource).all()
+        for resource in resources:
+            session.expire(resource, ["gateway"])
+
+        prompts = session.query(Prompt).all()
+        for prompt in prompts:
+            session.expire(prompt, ["gateway"])
+
         updated = False
         for tool in tools:
             if tool.gateway:
@@ -151,6 +159,24 @@ def refresh_slugs_on_startup():
                 new_name = slugify(tool.original_name)
             if tool.name != new_name:
                 tool.name = new_name
+                updated = True
+
+        for resource in resources:
+            if resource.gateway:
+                new_name = f"{resource.gateway.slug}{settings.gateway_tool_name_separator}{slugify(resource.original_name)}"
+            else:
+                new_name = slugify(resource.original_name)
+            if resource.name != new_name:
+                resource.name = new_name
+                updated = True
+
+        for prompt in prompts:
+            if prompt.gateway:
+                new_name = f"{prompt.gateway.slug}{settings.gateway_tool_name_separator}{slugify(prompt.original_name)}"
+            else:
+                new_name = slugify(prompt.original_name)
+            if prompt.name != new_name:
+                prompt.name = new_name
                 updated = True
         if updated:
             session.commit()
