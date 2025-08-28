@@ -65,6 +65,9 @@ def mock_resource():
     resource.id = "1"
     resource.uri = "http://example.com/resource"
     resource.name = "Test Resource"
+    resource.display_name = "Test Resource"
+    resource.custom_name = "Test Resource"
+    resource.custom_name_slug = "test-resource"
     resource.description = "A test resource"
     resource.mime_type = "text/plain"
     resource.template = None
@@ -180,6 +183,9 @@ class TestResourceRegistration:
                 id="1",
                 uri=sample_resource_create.uri,
                 name=sample_resource_create.name,
+                gateway_slug="test_gateway",
+                custom_name="Hello",
+                custom_name_slug="hello",
                 description=sample_resource_create.description or "",
                 mime_type="text/plain",
                 size=len(sample_resource_create.content),
@@ -293,6 +299,9 @@ class TestResourceRegistration:
                 id="1",
                 uri=binary_resource.uri,
                 name=binary_resource.name,
+                gateway_slug="test_gateway",
+                custom_name="Hello",
+                custom_name_slug="hello",
                 description=binary_resource.description or "",
                 mime_type="application/octet-stream",
                 size=len(binary_resource.content),
@@ -445,6 +454,9 @@ class TestResourceManagement:
                 id="2",
                 uri=mock_inactive_resource.uri,
                 name=mock_inactive_resource.name,
+                gateway_slug="test_gateway",
+                custom_name="Hello",
+                custom_name_slug="hello",
                 description=mock_inactive_resource.description or "",
                 mime_type=mock_inactive_resource.mime_type or "text/plain",
                 size=mock_inactive_resource.size or 0,
@@ -479,6 +491,9 @@ class TestResourceManagement:
                 id="1",
                 uri=mock_resource.uri,
                 name=mock_resource.name,
+                gateway_slug="test_gateway",
+                custom_name="Hello",
+                custom_name_slug="hello",
                 description=mock_resource.description,
                 mime_type=mock_resource.mime_type,
                 size=mock_resource.size,
@@ -525,6 +540,9 @@ class TestResourceManagement:
                 id="1",
                 uri=mock_resource.uri,
                 name=mock_resource.name,
+                gateway_slug="test_gateway",
+                custom_name="Hello",
+                custom_name_slug="hello",
                 description=mock_resource.description,
                 mime_type=mock_resource.mime_type,
                 size=mock_resource.size,
@@ -564,6 +582,9 @@ class TestResourceManagement:
                 id="1",
                 uri=mock_resource.uri,
                 name="Updated Name",
+                gateway_slug="test_gateway",
+                custom_name="Hello",
+                custom_name_slug="hello",
                 description="Updated description",
                 mime_type="text/plain",
                 size=15,  # length of "Updated content"
@@ -633,6 +654,9 @@ class TestResourceManagement:
                 id="1",
                 uri=mock_resource.uri,
                 name=mock_resource.name,
+                gateway_slug="test_gateway",
+                custom_name="Hello",
+                custom_name_slug="hello",
                 description=mock_resource.description,
                 mime_type="application/octet-stream",
                 size=len(b"new binary content"),

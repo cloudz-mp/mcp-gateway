@@ -912,6 +912,9 @@ async def test_export_selective_all_entity_types(export_service, mock_db):
 
     sample_prompt = PromptRead(
         id="1", name="test_prompt", template="Test template",
+        gatewaySlug="test_gateway",
+        custom_name="Hello",
+        custom_name_slug="hello",
         description="Test prompt", arguments=[], is_active=True,
         created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc),
         metrics=create_default_prompt_metrics(), tags=[]
@@ -919,6 +922,9 @@ async def test_export_selective_all_entity_types(export_service, mock_db):
 
     sample_resource = ResourceRead(
         id="1", name="test_resource", uri="file:///test.txt",
+        gateway_slug="test_gateway",
+        custom_name="Hello",
+        custom_name_slug="hello",
         description="Test resource", mime_type="text/plain", size=None, is_active=True,
         created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc),
         metrics=create_default_resource_metrics(), tags=[]
@@ -1057,6 +1063,9 @@ async def test_export_selected_prompts(export_service, mock_db):
 
     sample_prompt = PromptRead(
         id="1", name="test_prompt", template="Test template",
+        gatewaySlug="test_gateway",
+        custom_name="Hello",
+        custom_name_slug="hello",
         description="Test prompt", arguments=[], is_active=True,
         created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc),
         metrics=create_default_prompt_metrics(), tags=[]
@@ -1089,6 +1098,9 @@ async def test_export_selected_resources(export_service, mock_db):
 
     sample_resource = ResourceRead(
         id="1", name="test_resource", uri="file:///test.txt",
+        gateway_slug="test_gateway",
+        custom_name="Hello",
+        custom_name_slug="hello",
         description="Test resource", mime_type="text/plain", size=None, is_active=True,
         created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc),
         metrics=create_default_resource_metrics(), tags=[]
