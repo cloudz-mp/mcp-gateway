@@ -219,7 +219,7 @@ class PromptService:
         avg_rt = (sum(m.response_time for m in db_prompt.metrics) / total) if total > 0 else None
         last_time = max((m.timestamp for m in db_prompt.metrics), default=None) if total > 0 else None
 
-        return {
+        prompt_dict = {
             "id": db_prompt.id,
             "name": db_prompt.name,
             "description": db_prompt.description,
@@ -240,6 +240,16 @@ class PromptService:
             },
             "tags": db_prompt.tags or [],
         }
+
+        display_name = getattr(db_prompt, "display_name", None)
+        custom_name = getattr(db_prompt, "custom_name", db_prompt.original_name)
+        prompt_dict["displayName"] = display_name or custom_name
+        prompt_dict["custom_name"] = custom_name
+        prompt_dict["gateway_slug"] = getattr(db_prompt, "gateway_slug", "") or ""
+        prompt_dict["custom_name_slug"] = getattr(db_prompt, "custom_name_slug", "") or ""
+        prompt_dict["tags"] = getattr(db_prompt, "tags", []) or []
+
+        return prompt_dict
 
     async def register_prompt(
         self,

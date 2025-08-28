@@ -218,6 +218,17 @@ class ResourceService:
             "last_execution_time": last_time,
         }
         resource_dict["tags"] = resource.tags or []
+
+        resource_dict["name"] = resource.name
+        # Handle displayName with fallback and None checks
+        display_name = getattr(resource, "display_name", None)
+        custom_name = getattr(resource, "custom_name", resource.original_name)
+        resource_dict["displayName"] = display_name or custom_name
+        resource_dict["custom_name"] = custom_name
+        resource_dict["gateway_slug"] = getattr(resource, "gateway_slug", "") or ""
+        resource_dict["custom_name_slug"] = getattr(resource, "custom_name_slug", "") or ""
+        resource_dict["tags"] = getattr(resource, "tags", []) or []
+
         return ResourceRead.model_validate(resource_dict)
 
     async def register_resource(
