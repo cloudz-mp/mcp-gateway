@@ -627,8 +627,8 @@ async def admin_add_server(request: Request, db: Session = Depends(get_db), user
             description=form.get("description"),
             icon=form.get("icon"),
             associated_tools=",".join(form.getlist("associatedTools")),
-            associated_resources=form.get("associatedResources"),
-            associated_prompts=form.get("associatedPrompts"),
+            associated_resources=",".join(form.getlist("associatedResources")),
+            associated_prompts=",".join(form.getlist("associatedPrompts")),
             tags=tags,
         )
     except KeyError as e:
@@ -785,8 +785,8 @@ async def admin_edit_server(
             description=form.get("description"),
             icon=form.get("icon"),
             associated_tools=",".join(form.getlist("associatedTools")),
-            associated_resources=form.get("associatedResources"),
-            associated_prompts=form.get("associatedPrompts"),
+            associated_resources=",".join(form.getlist("associatedResources")),
+            associated_prompts=",".join(form.getlist("associatedPrompts")),
             tags=tags,
         )
         await server_service.update_server(db, server_id, server)

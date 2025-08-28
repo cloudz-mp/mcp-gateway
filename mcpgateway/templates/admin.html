@@ -959,16 +959,16 @@
                   <td
                     class="px-6 py-4 max-w-xs break-words text-sm text-gray-500 dark:text-gray-300"
                   >
-                    {% if server.associatedResources %} {{
-                    server.associatedResources | join(', ') }} {% else %}
+                    {% if server.associatedResources %} {{ server.associatedResources |
+                    map('string') | join(', ') }} {% else %}
                     <span class="text-gray-500 dark:text-gray-300">N/A</span>
                     {% endif %}
                   </td>
                   <td
                     class="px-6 py-4 max-w-xs break-words text-sm text-gray-500 dark:text-gray-300"
                   >
-                    {% if server.associatedPrompts %} {{
-                    server.associatedPrompts | join(', ') }} {% else %}
+                    {% if server.associatedPrompts %} {{ server.associatedPrompts |
+                    map('string') | join(', ') }} {% else %}
                     <span class="text-gray-500 dark:text-gray-300">N/A</span>
                     {% endif %}
                   </td>
@@ -1154,7 +1154,7 @@
                     class="text-gray-700 dark:text-gray-300"
                     style="display: none"
                   >
-                    No tool found containing "<span id="searchQuery"></span>"
+                    No tool found containing "<span id="toolSearchQuery"></span>"
                   </p>
                 </div>
                 <div class="flex justify-end mt-3 gap-2">
@@ -1227,7 +1227,7 @@
                     class="text-gray-700 dark:text-gray-300"
                     style="display: none"
                   >
-                    No resource found containing "<span id="searchQuery"></span>"
+                    No resource found containing "<span id="resourceSearchQuery"></span>"
                   </p>
                 </div>
                 <div class="flex justify-end mt-3 gap-2">
@@ -1287,7 +1287,7 @@
                     class="text-gray-700 dark:text-gray-300"
                     style="display: none"
                   >
-                    No prompt found containing "<span id="searchQuery"></span>"
+                    No prompt found containing "<span id="promptSearchQuery"></span>"
                   </p>
                 </div>
                 <div class="flex justify-end mt-3 gap-2">
@@ -6003,12 +6003,23 @@
 
       // Add search functionality for filtering tools
       document.addEventListener('DOMContentLoaded', function() {
-        const searchBox = document.getElementById('searchTools');
+        const toolSearchBox = document.getElementById('searchTools');
+        const resourceSearchBox = document.getElementById('searchResources');
+        const promptSearchBox = document.getElementById('searchPrompts');
+        
         const toolItems = document.querySelectorAll('#associatedTools .tool-item');
-        const noToolsMessage = document.getElementById('noToolsMessage');
-        const searchQuerySpan = document.getElementById('searchQuery');
+        const resourceItems = document.querySelectorAll('#associatedResources .resource-item');
+        const promptItems = document.querySelectorAll('#associatedPrompts .prompt-item');
 
-        searchBox.addEventListener('input', function() {
+        const noToolsMessage = document.getElementById('noToolsMessage');
+        const noResourcesMessage = document.getElementById('noResourcesMessage');
+        const noPromptsMessage = document.getElementById('noPromptsMessage');
+
+        const toolSearchQuerySpan = document.getElementById('toolSearchQuery');
+        const resourceSearchQuerySpan = document.getElementById('resourceSearchQuery');
+        const promptSearchQuerySpan = document.getElementById('promptSearchQuery');
+
+        toolSearchBox.addEventListener('input', function() {
           const filter = this.value.toLowerCase();
           let hasVisibleItems = false;
 
@@ -6025,8 +6036,52 @@
           if (hasVisibleItems) {
             noToolsMessage.style.display = 'none';
           } else {
-            searchQuerySpan.textContent = filter;
+            toolSearchQuerySpan.textContent = filter;
             noToolsMessage.style.display = 'block';
+          }
+        });
+
+        resourceSearchBox.addEventListener('input', function() {
+          const filter = this.value.toLowerCase();
+          let hasVisibleItems = false;
+
+          resourceItems.forEach(function(resourceItem) {
+            const resourceName = resourceItem.querySelector('span').textContent.toLowerCase();
+            if (resourceName.includes(filter)) {
+              resourceItem.style.display = '';
+              hasVisibleItems = true;
+            } else {
+              resourceItem.style.display = 'none';
+            }
+          });
+
+          if (hasVisibleItems) {
+            noResourcesMessage.style.display = 'none';
+          } else {
+            resourceSearchQuerySpan.textContent = filter;
+            noResourcesMessage.style.display = 'block';
+          }
+        });
+
+        promptSearchBox.addEventListener('input', function() {
+          const filter = this.value.toLowerCase();
+          let hasVisibleItems = false;
+
+          promptItems.forEach(function(promptItem) {
+            const promptName = promptItem.querySelector('span').textContent.toLowerCase();
+            if (promptName.includes(filter)) {
+              promptItem.style.display = '';
+              hasVisibleItems = true;
+            } else {
+              promptItem.style.display = 'none';
+            }
+          });
+
+          if (hasVisibleItems) {
+            noPromptsMessage.style.display = 'none';
+          } else {
+            promptSearchQuerySpan.textContent = filter;
+            noPromptsMessage.style.display = 'block';
           }
         });
       });
