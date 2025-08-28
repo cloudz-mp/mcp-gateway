@@ -4253,7 +4253,7 @@ function initResourceSelect(
     function update() {
         try {
             const checked = Array.from(checkboxes).filter((cb) => cb.checked);
-            // const count = checked.length;
+            const count = checked.length;
         } catch (error) {
             console.error("Error updating resource select:", error);
         }
@@ -4297,7 +4297,7 @@ function initPromptSelect(
     function update() {
         try {
             const checked = Array.from(checkboxes).filter((cb) => cb.checked);
-            // const count = checked.length;
+            const count = checked.length;
         } catch (error) {
             console.error("Error updating prompt select:", error);
         }
