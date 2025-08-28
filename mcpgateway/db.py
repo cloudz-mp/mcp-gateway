@@ -1838,7 +1838,7 @@ def set_a2a_agent_slug(_mapper, _conn, target):
 
 @event.listens_for(Tool, "before_insert")
 @event.listens_for(Tool, "before_update")
-def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
+def set_tool_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
     """
     Event listener to set custom_name, custom_name_slug, and name for Tool before insert/update.
 
@@ -1871,7 +1871,7 @@ def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unu
 
 @event.listens_for(Prompt, "before_insert")
 @event.listens_for(Prompt, "before_update")
-def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
+def set_prompt_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
     """
     Event listener to set custom_name, custom_name_slug, and name for Prompt before insert/update.
 
@@ -1904,7 +1904,7 @@ def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unu
 
 @event.listens_for(Resource, "before_insert")
 @event.listens_for(Resource, "before_update")
-def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
+def set_resource_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
     """
     Event listener to set custom_name, custom_name_slug, and name for Resource before insert/update.
 
