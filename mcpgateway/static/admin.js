@@ -4233,6 +4233,99 @@ function initToolSelect(
     checkboxes.forEach((cb) => cb.addEventListener("change", update));
 }
 
+function initResourceSelect(
+    selectId,
+    max = 6,
+    selectBtnId = null,
+    clearBtnId = null,
+) {
+    const container = document.getElementById(selectId);
+    const clearBtn = clearBtnId ? document.getElementById(clearBtnId) : null;
+    const selectBtn = selectBtnId ? document.getElementById(selectBtnId) : null;
+
+    if (!container) {
+        console.warn(
+            `Resource select elements not found: ${selectId}`,
+        );
+        return;
+    }
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+
+    function update() {
+        try {
+            const checked = Array.from(checkboxes).filter((cb) => cb.checked);
+            const count = checked.length;
+
+        } catch (error) {
+            console.error("Error updating resource select:", error);
+        }
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            checkboxes.forEach((cb) => (cb.checked = false));
+            update();
+        });
+    }
+
+    if (selectBtn) {
+        selectBtn.addEventListener("click", () => {
+            checkboxes.forEach((cb) => (cb.checked = true));
+            update();
+        });
+    }
+
+    update(); // Initial render
+    checkboxes.forEach((cb) => cb.addEventListener("change", update));
+}
+
+function initPromptSelect(
+    selectId,
+    max = 6,
+    selectBtnId = null,
+    clearBtnId = null,
+) {
+    const container = document.getElementById(selectId);
+    const clearBtn = clearBtnId ? document.getElementById(clearBtnId) : null;
+    const selectBtn = selectBtnId ? document.getElementById(selectBtnId) : null;
+
+    if (!container) {
+        console.warn(
+            `Prompt select elements not found: ${selectId}`,
+        );
+        return;
+    }
+
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+
+    function update() {
+        try {
+            const checked = Array.from(checkboxes).filter((cb) => cb.checked);
+            const count = checked.length;
+
+        } catch (error) {
+            console.error("Error updating prompt select:", error);
+        }
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            checkboxes.forEach((cb) => (cb.checked = false));
+            update();
+        });
+    }
+
+    if (selectBtn) {
+        selectBtn.addEventListener("click", () => {
+            checkboxes.forEach((cb) => (cb.checked = true));
+            update();
+        });
+    }
+
+    update(); // Initial render
+    checkboxes.forEach((cb) => cb.addEventListener("change", update));
+}
 // ===================================================================
 // INACTIVE ITEMS HANDLING
 // ===================================================================
