@@ -1445,6 +1445,8 @@ class ResourceRead(BaseModelWithConfigDict):
     updated_at: datetime
     is_active: bool
     metrics: ResourceMetrics
+    displayName: Optional[str] = Field(None, description="Display name for the resource (shown in UI)")  # noqa: N815
+    gateway_slug: str
     custom_name: str
     custom_name_slug: str
     tags: List[str] = Field(default_factory=list, description="Tags for categorizing the resource")
@@ -1979,6 +1981,8 @@ class PromptRead(BaseModelWithConfigDict):
     created_at: datetime
     updated_at: datetime
     is_active: bool
+    displayName: Optional[str] = Field(None, description="Display name for the prompt (shown in UI)")  # noqa: N815
+    gateway_slug: str
     custom_name: str
     custom_name_slug: str
     tags: List[str] = Field(default_factory=list, description="Tags for categorizing the prompt")

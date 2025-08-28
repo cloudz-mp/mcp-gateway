@@ -713,7 +713,7 @@ class Resource(Base):
     display_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     gateway_id: Mapped[Optional[str]] = mapped_column(ForeignKey("gateways.id"))
-    gateway: Mapped["Gateway"] = relationship("Gateway", back_populates="resources")
+    gateway: Mapped["Gateway"] = relationship("Gateway", primaryjoin="Resource.gateway_id == Gateway.id", foreign_keys=[gateway_id], back_populates="resources")
     # federated_with = relationship("Gateway", secondary=resource_gateway_table, back_populates="federated_resources")
 
     # Many-to-many relationship with Servers
@@ -1003,7 +1003,7 @@ class Prompt(Base):
     display_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     gateway_id: Mapped[Optional[str]] = mapped_column(ForeignKey("gateways.id"))
-    gateway: Mapped["Gateway"] = relationship("Gateway", back_populates="prompts")
+    gateway: Mapped["Gateway"] = relationship("Gateway", primaryjoin="Prompt.gateway_id == Gateway.id", foreign_keys=[gateway_id], back_populates="prompts")
     # federated_with = relationship("Gateway", secondary=prompt_gateway_table, back_populates="federated_prompts")
 
     # Many-to-many relationship with Servers
