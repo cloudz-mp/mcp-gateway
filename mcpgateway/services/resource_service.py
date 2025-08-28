@@ -49,8 +49,8 @@ from mcpgateway.models import ResourceContent, ResourceTemplate, TextContent
 from mcpgateway.observability import create_span
 from mcpgateway.schemas import ResourceCreate, ResourceMetrics, ResourceRead, ResourceSubscription, ResourceUpdate, TopPerformer
 from mcpgateway.services.logging_service import LoggingService
-from mcpgateway.utils.metrics_common import build_top_performers
 from mcpgateway.utils.create_slug import slugify
+from mcpgateway.utils.metrics_common import build_top_performers
 
 # Plugin support imports (conditional)
 try:

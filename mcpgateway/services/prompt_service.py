@@ -37,8 +37,8 @@ from mcpgateway.observability import create_span
 from mcpgateway.plugins.framework import GlobalContext, PluginManager, PluginViolationError, PromptPosthookPayload, PromptPrehookPayload
 from mcpgateway.schemas import PromptCreate, PromptRead, PromptUpdate, TopPerformer
 from mcpgateway.services.logging_service import LoggingService
-from mcpgateway.utils.metrics_common import build_top_performers
 from mcpgateway.utils.create_slug import slugify
+from mcpgateway.utils.metrics_common import build_top_performers
 
 # Initialize logging service first
 logging_service = LoggingService()

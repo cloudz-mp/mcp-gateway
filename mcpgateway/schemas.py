@@ -373,7 +373,7 @@ class ToolCreate(BaseModel):
             str: Value if validated as safe
 
         Raises:
-            ValueError: When displayName contains unsafe content or exceeds length limits
+            ValueError: When name contains unsafe content or exceeds length limits
 
         Examples:
             >>> from mcpgateway.schemas import ToolCreate
@@ -398,7 +398,7 @@ class ToolCreate(BaseModel):
             str: Value if validated as safe
 
         Raises:
-            ValueError: When displayName contains unsafe content or exceeds length limits
+            ValueError: When url contains unsafe content or exceeds length limits
 
         Examples:
             >>> from mcpgateway.schemas import ToolCreate
@@ -1291,7 +1291,7 @@ class ResourceUpdate(BaseModelWithConfigDict):
     """
 
     name: Optional[str] = Field(None, description="Human-readable resource name")
-    displayName: Optional[str] = Field(None, description="Display name for the tool (shown in UI)")  # noqa: N815
+    displayName: Optional[str] = Field(None, description="Display name for the resource (shown in UI)")  # noqa: N815
     custom_name: Optional[str] = Field(None, description="Custom name for the resource")
     description: Optional[str] = Field(None, description="Resource description")
     mime_type: Optional[str] = Field(None, description="Resource MIME type")
@@ -1757,7 +1757,7 @@ class PromptCreate(BaseModel):
         if len(v) > SecurityValidator.MAX_DESCRIPTION_LENGTH:
             raise ValueError(f"Description exceeds maximum length of {SecurityValidator.MAX_DESCRIPTION_LENGTH}")
         return SecurityValidator.sanitize_display_text(v, "Description")
-    
+
     @field_validator("displayName")
     @classmethod
     def validate_display_name(cls, v: Optional[str]) -> Optional[str]:
@@ -3009,7 +3009,7 @@ class ServerCreate(BaseModel):
             str: Value if validated as safe
 
         Raises:
-            ValueError: When displayName contains unsafe content or exceeds length limits
+            ValueError: When id contains unsafe content or exceeds length limits
 
         Examples:
             >>> from mcpgateway.schemas import ServerCreate

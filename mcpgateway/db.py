@@ -1901,6 +1901,7 @@ def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unu
     else:
         target.name = target.custom_name_slug
 
+
 @event.listens_for(Resource, "before_insert")
 @event.listens_for(Resource, "before_update")
 def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
