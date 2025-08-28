@@ -62,7 +62,7 @@ def mock_resource():
     resource = MagicMock()
 
     # core attributes
-    resource.id = 1
+    resource.id = "1"
     resource.uri = "http://example.com/resource"
     resource.name = "Test Resource"
     resource.description = "A test resource"
@@ -94,7 +94,7 @@ def mock_inactive_resource():
     resource = MagicMock()
 
     # core attributes
-    resource.id = 2
+    resource.id = "2"
     resource.uri = "http://example.com/inactive"
     resource.name = "Inactive Resource"
     resource.description = "An inactive resource"
@@ -177,7 +177,7 @@ class TestResourceRegistration:
             patch.object(resource_service, "_convert_resource_to_read") as mock_convert,
         ):
             mock_convert.return_value = ResourceRead(
-                id=1,
+                id="1",
                 uri=sample_resource_create.uri,
                 name=sample_resource_create.name,
                 description=sample_resource_create.description or "",
@@ -290,7 +290,7 @@ class TestResourceRegistration:
             patch.object(resource_service, "_convert_resource_to_read") as mock_convert,
         ):
             mock_convert.return_value = ResourceRead(
-                id=1,
+                id="1",
                 uri=binary_resource.uri,
                 name=binary_resource.name,
                 description=binary_resource.description or "",
@@ -442,7 +442,7 @@ class TestResourceManagement:
 
         with patch.object(resource_service, "_notify_resource_activated", new_callable=AsyncMock), patch.object(resource_service, "_convert_resource_to_read") as mock_convert:
             mock_convert.return_value = ResourceRead(
-                id=2,
+                id="2",
                 uri=mock_inactive_resource.uri,
                 name=mock_inactive_resource.name,
                 description=mock_inactive_resource.description or "",
@@ -464,7 +464,7 @@ class TestResourceManagement:
                 },
             )
 
-            result = await resource_service.toggle_resource_status(mock_db, 2, activate=True)
+            result = await resource_service.toggle_resource_status(mock_db, "2", activate=True)
 
             assert mock_inactive_resource.is_active is True
             mock_db.commit.assert_called_once()
@@ -476,7 +476,7 @@ class TestResourceManagement:
 
         with patch.object(resource_service, "_notify_resource_deactivated", new_callable=AsyncMock), patch.object(resource_service, "_convert_resource_to_read") as mock_convert:
             mock_convert.return_value = ResourceRead(
-                id=1,
+                id="1",
                 uri=mock_resource.uri,
                 name=mock_resource.name,
                 description=mock_resource.description,
@@ -498,7 +498,7 @@ class TestResourceManagement:
                 },
             )
 
-            result = await resource_service.toggle_resource_status(mock_db, 1, activate=False)
+            result = await resource_service.toggle_resource_status(mock_db, "1", activate=False)
 
             assert mock_resource.is_active is False
             mock_db.commit.assert_called_once()
@@ -522,7 +522,7 @@ class TestResourceManagement:
 
         with patch.object(resource_service, "_convert_resource_to_read") as mock_convert:
             mock_convert.return_value = ResourceRead(
-                id=1,
+                id="1",
                 uri=mock_resource.uri,
                 name=mock_resource.name,
                 description=mock_resource.description,
@@ -545,7 +545,7 @@ class TestResourceManagement:
             )
 
             # Try to activate already active resource
-            result = await resource_service.toggle_resource_status(mock_db, 1, activate=True)
+            result = await resource_service.toggle_resource_status(mock_db, "1", activate=True)
 
             # Should not commit or notify
             mock_db.commit.assert_not_called()
@@ -561,7 +561,7 @@ class TestResourceManagement:
 
         with patch.object(resource_service, "_notify_resource_updated", new_callable=AsyncMock), patch.object(resource_service, "_convert_resource_to_read") as mock_convert:
             mock_convert.return_value = ResourceRead(
-                id=1,
+                id="1",
                 uri=mock_resource.uri,
                 name="Updated Name",
                 description="Updated description",
@@ -630,7 +630,7 @@ class TestResourceManagement:
 
         with patch.object(resource_service, "_notify_resource_updated", new_callable=AsyncMock), patch.object(resource_service, "_convert_resource_to_read") as mock_convert:
             mock_convert.return_value = ResourceRead(
-                id=1,
+                id="1",
                 uri=mock_resource.uri,
                 name=mock_resource.name,
                 description=mock_resource.description,
@@ -1384,7 +1384,7 @@ class TestResourceServiceMetricsExtended:
         """Test getting top performing resources."""
         # Mock query results
         mock_result1 = MagicMock()
-        mock_result1.id = 1
+        mock_result1.id = "1"
         mock_result1.name = "resource1"
         mock_result1.execution_count = 10
         mock_result1.avg_response_time = 1.5
@@ -1392,7 +1392,7 @@ class TestResourceServiceMetricsExtended:
         mock_result1.last_execution = "2025-01-10T12:00:00"
 
         mock_result2 = MagicMock()
-        mock_result2.id = 2
+        mock_result2.id = "2"
         mock_result2.name = "resource2"
         mock_result2.execution_count = 7
         mock_result2.avg_response_time = 2.3

@@ -56,8 +56,8 @@ MOCK_SERVER_READ = {
     "updated_at": "2023-01-01T00:00:00+00:00",
     "is_active": True,
     "associated_tools": ["101"],
-    "associated_resources": [201],
-    "associated_prompts": [301],
+    "associated_resources": ["201"],
+    "associated_prompts": ["301"],
     "metrics": MOCK_METRICS,
 }
 
@@ -116,7 +116,7 @@ MOCK_TOOL_READ_SNAKE = camel_to_snake_tool(MOCK_TOOL_READ)
 
 
 MOCK_RESOURCE_READ = {
-    "id": 1,
+    "id": "1",
     "uri": "test/resource",
     "name": "Test Resource",
     "description": "A test resource",
@@ -129,7 +129,7 @@ MOCK_RESOURCE_READ = {
 }
 
 MOCK_PROMPT_READ = {
-    "id": 1,
+    "id": "1",
     "name": "test_prompt",
     "description": "A test prompt",
     "template": "Hello {name}",
