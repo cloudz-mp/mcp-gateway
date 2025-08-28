@@ -280,7 +280,7 @@ class ResourceService:
             # Create DB model
             db_resource = DbResource(
                 uri=resource.uri,
-                name=resource.name,
+                original_name=resource.name,
                 custom_name=resource.name,
                 custom_name_slug=slugify(resource.name),
                 description=resource.description,

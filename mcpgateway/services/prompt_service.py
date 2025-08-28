@@ -310,7 +310,7 @@ class PromptService:
 
             # Create DB model
             db_prompt = DbPrompt(
-                name=prompt.name,
+                original_name=prompt.name,
                 custom_name=prompt.name,
                 custom_name_slug=slugify(prompt.name),
                 description=prompt.description,

@@ -1261,6 +1261,8 @@ class ResourceUpdate(BaseModelWithConfigDict):
     """
 
     name: Optional[str] = Field(None, description="Human-readable resource name")
+    displayName: Optional[str] = Field(None, description="Display name for the tool (shown in UI)")  # noqa: N815
+    custom_name: Optional[str] = Field(None, description="Custom name for the resource")
     description: Optional[str] = Field(None, description="Resource description")
     mime_type: Optional[str] = Field(None, description="Resource MIME type")
     template: Optional[str] = Field(None, description="URI template for parameterized resources")
@@ -1757,6 +1759,8 @@ class PromptUpdate(BaseModelWithConfigDict):
     """
 
     name: Optional[str] = Field(None, description="Unique name for the prompt")
+    displayName: Optional[str] = Field(None, description="Display name for the prompt (shown in UI)")  # noqa: N815
+    custom_name: Optional[str] = Field(None, description="Custom name for the prompt")
     description: Optional[str] = Field(None, description="Prompt description")
     template: Optional[str] = Field(None, description="Prompt template text")
     arguments: Optional[List[PromptArgument]] = Field(None, description="List of arguments for the template")
