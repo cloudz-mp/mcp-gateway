@@ -545,7 +545,7 @@ class ResourceService:
             # Return content
             return content
 
-    async def toggle_resource_status(self, db: Session, resource_id: int, activate: bool) -> ResourceRead:
+    async def toggle_resource_status(self, db: Session, resource_id: str, activate: bool) -> ResourceRead:
         """
         Toggle the activation status of a resource.
 

@@ -675,7 +675,7 @@ class PromptService:
             db.rollback()
             raise PromptError(f"Failed to update prompt: {str(e)}")
 
-    async def toggle_prompt_status(self, db: Session, prompt_id: int, activate: bool) -> PromptRead:
+    async def toggle_prompt_status(self, db: Session, prompt_id: str, activate: bool) -> PromptRead:
         """
         Toggle the activation status of a prompt.
 

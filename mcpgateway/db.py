@@ -173,7 +173,7 @@ server_resource_association = Table(
     "server_resource_association",
     Base.metadata,
     Column("server_id", String, ForeignKey("servers.id"), primary_key=True),
-    Column("resource_id", Integer, ForeignKey("resources.id"), primary_key=True),
+    Column("resource_id", String, ForeignKey("resources.id"), primary_key=True),
 )
 
 # Association table for servers and prompts
@@ -181,7 +181,7 @@ server_prompt_association = Table(
     "server_prompt_association",
     Base.metadata,
     Column("server_id", String, ForeignKey("servers.id"), primary_key=True),
-    Column("prompt_id", Integer, ForeignKey("prompts.id"), primary_key=True),
+    Column("prompt_id", String, ForeignKey("prompts.id"), primary_key=True),
 )
 
 # Association table for servers and A2A agents
@@ -241,7 +241,7 @@ class ResourceMetric(Base):
 
     Attributes:
         id (int): Primary key.
-        resource_id (int): Foreign key linking to the resource.
+        resource_id (str): Foreign key linking to the resource.
         timestamp (datetime): The time when the invocation occurred.
         response_time (float): The response time in seconds.
         is_success (bool): True if the invocation succeeded, False otherwise.
@@ -251,7 +251,7 @@ class ResourceMetric(Base):
     __tablename__ = "resource_metrics"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    resource_id: Mapped[int] = mapped_column(Integer, ForeignKey("resources.id"), nullable=False)
+    resource_id: Mapped[str] = mapped_column(Integer, ForeignKey("resources.id"), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     response_time: Mapped[float] = mapped_column(Float, nullable=False)
     is_success: Mapped[bool] = mapped_column(Boolean, nullable=False)
@@ -293,7 +293,7 @@ class PromptMetric(Base):
 
     Attributes:
         id (int): Primary key.
-        prompt_id (int): Foreign key linking to the prompt.
+        prompt_id (str): Foreign key linking to the prompt.
         timestamp (datetime): The time when the invocation occurred.
         response_time (float): The response time in seconds.
         is_success (bool): True if the invocation succeeded, False otherwise.
@@ -303,7 +303,7 @@ class PromptMetric(Base):
     __tablename__ = "prompt_metrics"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    prompt_id: Mapped[int] = mapped_column(Integer, ForeignKey("prompts.id"), nullable=False)
+    prompt_id: Mapped[str] = mapped_column(Integer, ForeignKey("prompts.id"), nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     response_time: Mapped[float] = mapped_column(Float, nullable=False)
     is_success: Mapped[bool] = mapped_column(Boolean, nullable=False)
@@ -645,7 +645,7 @@ class Resource(Base):
 
     __tablename__ = "resources"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: uuid.uuid4().hex)
     uri: Mapped[str] = mapped_column(unique=True)
     name: Mapped[str]
     description: Mapped[Optional[str]]
@@ -846,7 +846,7 @@ class ResourceSubscription(Base):
     __tablename__ = "resource_subscriptions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    resource_id: Mapped[int] = mapped_column(ForeignKey("resources.id"))
+    resource_id: Mapped[str] = mapped_column(ForeignKey("resources.id"))
     subscriber_id: Mapped[str]  # Client identifier
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     last_notification: Mapped[Optional[datetime]] = mapped_column(DateTime)
@@ -874,7 +874,7 @@ class Prompt(Base):
 
     __tablename__ = "prompts"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: uuid.uuid4().hex)
     name: Mapped[str] = mapped_column(unique=True)
     description: Mapped[Optional[str]]
     template: Mapped[str] = mapped_column(Text)
