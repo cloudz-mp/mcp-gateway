@@ -6694,8 +6694,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1. Initialize CodeMirror editors first
         initializeCodeMirrorEditors();
 
-        // 2. Initialize tool selects
+        // 2. Initialize tool, resource, prompt selects
         initializeToolSelects();
+        initializeResourceSelects();
+        initializePromptSelects();
 
         // 3. Set up all event listeners
         initializeEventListeners();
@@ -6853,6 +6855,40 @@ function initializeToolSelects() {
         6,
         "selectAllEditToolsBtn",
         "clearAllEditToolsBtn",
+    );
+}
+
+function initializeResourceSelects() {
+    console.log("Initializing resource selects...");
+
+    initResourceSelect(
+        "associatedResources",
+        6,
+        "selectAllResourcesBtn",
+        "clearAllResourcesBtn",
+    );
+    initResourceSelect(
+        "edit-server-resources",
+        6,
+        "selectAllEditResourcesBtn",
+        "clearAllEditResourcesBtn",
+    );
+}
+
+function initializePromptSelects() {
+    console.log("Initializing prompt selects...");
+
+    initPromptSelect(
+        "associatedPrompts",
+        6,
+        "selectAllPromptsBtn",
+        "clearAllPromptsBtn",
+    );
+    initPromptSelect(
+        "edit-server-prompts",
+        6,
+        "selectAllEditPromptsBtn",
+        "clearAllEditPromptsBtn",
     );
 }
 

@@ -207,8 +207,8 @@ class ServerService:
         }
         # Also update associated IDs (if not already done)
         server_dict["associated_tools"] = [tool.name for tool in server.tools] if server.tools else []
-        server_dict["associated_resources"] = [res.id for res in server.resources] if server.resources else []
-        server_dict["associated_prompts"] = [prompt.id for prompt in server.prompts] if server.prompts else []
+        server_dict["associated_resources"] = [res.name for res in server.resources] if server.resources else []
+        server_dict["associated_prompts"] = [prompt.name for prompt in server.prompts] if server.prompts else []
         server_dict["associated_a2a_agents"] = [agent.id for agent in server.a2a_agents] if server.a2a_agents else []
         server_dict["tags"] = server.tags or []
         return ServerRead.model_validate(server_dict)
@@ -475,8 +475,8 @@ class ServerService:
             "updated_at": server.updated_at,
             "is_active": server.is_active,
             "associated_tools": [tool.name for tool in server.tools],
-            "associated_resources": [res.id for res in server.resources],
-            "associated_prompts": [prompt.id for prompt in server.prompts],
+            "associated_resources": [res.name for res in server.resources],
+            "associated_prompts": [prompt.name for prompt in server.prompts],
         }
         logger.debug(f"Server Data: {server_data}")
         return self._convert_server_to_read(server)
