@@ -647,7 +647,7 @@ class Resource(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: uuid.uuid4().hex)
     uri: Mapped[str] = mapped_column(unique=True)
-    name: Mapped[str]
+    original_name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[Optional[str]]
     mime_type: Mapped[Optional[str]]
     size: Mapped[Optional[int]]
@@ -681,12 +681,19 @@ class Resource(Base):
     # Subscription tracking
     subscriptions: Mapped[List["ResourceSubscription"]] = relationship("ResourceSubscription", back_populates="resource", cascade="all, delete-orphan")
 
+    # custom_name,custom_name_slug, display_name
+    custom_name: Mapped[Optional[str]] = mapped_column(String, nullable=False)
+    custom_name_slug: Mapped[Optional[str]] = mapped_column(String, nullable=False)
+    display_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
     gateway_id: Mapped[Optional[str]] = mapped_column(ForeignKey("gateways.id"))
     gateway: Mapped["Gateway"] = relationship("Gateway", back_populates="resources")
     # federated_with = relationship("Gateway", secondary=resource_gateway_table, back_populates="federated_resources")
 
     # Many-to-many relationship with Servers
     servers: Mapped[List["Server"]] = relationship("Server", secondary=server_resource_association, back_populates="resources")
+
+    _computed_name = Column("name", String, unique=True)  # Stored column
 
     @property
     def content(self) -> ResourceContent:
@@ -741,6 +748,69 @@ class Resource(Base):
                 blob=self.binary_content,
             )
         raise ValueError("Resource has no content")
+
+    @hybrid_property
+    def name(self):
+        """Return the display/lookup name.
+
+        Returns:
+            str: Name to display
+        """
+        if self._computed_name:  # pylint: disable=no-member
+            return self._computed_name  # orm column, resolved at runtime
+
+        custom_name_slug = slugify(self.custom_name_slug)  # pylint: disable=no-member
+
+        # Gateway present → prepend its slug and the configured separator
+        if self.gateway_id:  # pylint: disable=no-member
+            gateway_slug = slugify(self.gateway.name)  # pylint: disable=no-member
+            return f"{gateway_slug}{settings.gateway_tool_name_separator}{custom_name_slug}"
+
+        # No gateway → only the original name slug
+        return custom_name_slug
+
+    @name.setter
+    def name(self, value):
+        """Store an explicit value that overrides the calculated one.
+
+        Args:
+            value (str): Value to set to _computed_name
+        """
+        self._computed_name = value
+
+    @name.expression
+    @classmethod
+    def name(cls):
+        """
+        SQL expression used when the hybrid appears in a filter/order_by.
+        Simply forwards to the ``_computed_name`` column; the Python-side
+        reconstruction above is not needed on the SQL side.
+
+        Returns:
+            str: computed name for SQL use
+        """
+        return cls._computed_name
+
+    __table_args__ = (UniqueConstraint("gateway_id", "original_name", name="uq_gateway_id__original_name"),)
+
+    @hybrid_property
+    def gateway_slug(self):
+        """Always returns the current slug from the related Gateway
+
+        Returns:
+            str: slug for Python use
+        """
+        return self.gateway.slug if self.gateway else None
+
+    @gateway_slug.expression
+    @classmethod
+    def gateway_slug(cls):
+        """For database queries - auto-joins to get current slug
+
+        Returns:
+            str: slug for SQL use
+        """
+        return select(Gateway.slug).where(Gateway.id == cls.gateway_id).scalar_subquery()
 
     @property
     def execution_count(self) -> int:
@@ -875,7 +945,7 @@ class Prompt(Base):
     __tablename__ = "prompts"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: uuid.uuid4().hex)
-    name: Mapped[str] = mapped_column(unique=True)
+    original_name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[Optional[str]]
     template: Mapped[str] = mapped_column(Text)
     argument_schema: Mapped[Dict[str, Any]] = mapped_column(JSON)
@@ -901,12 +971,82 @@ class Prompt(Base):
 
     metrics: Mapped[List["PromptMetric"]] = relationship("PromptMetric", back_populates="prompt", cascade="all, delete-orphan")
 
+    # custom_name,custom_name_slug, display_name
+    custom_name: Mapped[Optional[str]] = mapped_column(String, nullable=False)
+    custom_name_slug: Mapped[Optional[str]] = mapped_column(String, nullable=False)
+    display_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
     gateway_id: Mapped[Optional[str]] = mapped_column(ForeignKey("gateways.id"))
     gateway: Mapped["Gateway"] = relationship("Gateway", back_populates="prompts")
     # federated_with = relationship("Gateway", secondary=prompt_gateway_table, back_populates="federated_prompts")
 
     # Many-to-many relationship with Servers
     servers: Mapped[List["Server"]] = relationship("Server", secondary=server_prompt_association, back_populates="prompts")
+
+    _computed_name = Column("name", String, unique=True)  # Stored column
+
+    @hybrid_property
+    def name(self):
+        """Return the display/lookup name.
+
+        Returns:
+            str: Name to display
+        """
+        if self._computed_name:  # pylint: disable=no-member
+            return self._computed_name  # orm column, resolved at runtime
+
+        custom_name_slug = slugify(self.custom_name_slug)  # pylint: disable=no-member
+
+        # Gateway present → prepend its slug and the configured separator
+        if self.gateway_id:  # pylint: disable=no-member
+            gateway_slug = slugify(self.gateway.name)  # pylint: disable=no-member
+            return f"{gateway_slug}{settings.gateway_tool_name_separator}{custom_name_slug}"
+
+        # No gateway → only the original name slug
+        return custom_name_slug
+
+    @name.setter
+    def name(self, value):
+        """Store an explicit value that overrides the calculated one.
+
+        Args:
+            value (str): Value to set to _computed_name
+        """
+        self._computed_name = value
+
+    @name.expression
+    @classmethod
+    def name(cls):
+        """
+        SQL expression used when the hybrid appears in a filter/order_by.
+        Simply forwards to the ``_computed_name`` column; the Python-side
+        reconstruction above is not needed on the SQL side.
+
+        Returns:
+            str: computed name for SQL use
+        """
+        return cls._computed_name
+
+    __table_args__ = (UniqueConstraint("gateway_id", "original_name", name="uq_gateway_id__original_name"),)
+
+    @hybrid_property
+    def gateway_slug(self):
+        """Always returns the current slug from the related Gateway
+
+        Returns:
+            str: slug for Python use
+        """
+        return self.gateway.slug if self.gateway else None
+
+    @gateway_slug.expression
+    @classmethod
+    def gateway_slug(cls):
+        """For database queries - auto-joins to get current slug
+
+        Returns:
+            str: slug for SQL use
+        """
+        return select(Gateway.slug).where(Gateway.id == cls.gateway_id).scalar_subquery()
 
     def validate_arguments(self, args: Dict[str, str]) -> None:
         """
@@ -1304,6 +1444,48 @@ def update_tool_names_on_gateway_update(_mapper, connection, target):
     # 5. Execute the statement using the connection from the ongoing transaction.
     connection.execute(stmt)
 
+    print(f"Gateway name changed for ID {target.id}. Issuing bulk update for prompts.")
+
+    # 2. Get a reference to the underlying database table for Prompts
+    prompts_table = Prompt.__table__
+
+    # 3. Prepare the new values
+    new_gateway_slug = slugify(target.name)
+    separator = settings.gateway_tool_name_separator
+
+    # 4. Construct a single, powerful UPDATE statement using SQLAlchemy Core.
+    #    This is highly efficient as it all happens in the database.
+    stmt = (
+        prompts_table.update()
+        .where(prompts_table.c.gateway_id == target.id)
+        .values(name=new_gateway_slug + separator + prompts_table.c.custom_name_slug)
+        .execution_options(synchronize_session=False)  # Important for bulk updates
+    )
+
+    # 5. Execute the statement using the connection from the ongoing transaction.
+    connection.execute(stmt)
+
+    print(f"Gateway name changed for ID {target.id}. Issuing bulk update for resources.")
+
+    # 2. Get a reference to the underlying database table for Prompts
+    resources_table = Resource.__table__
+
+    # 3. Prepare the new values
+    new_gateway_slug = slugify(target.name)
+    separator = settings.gateway_tool_name_separator
+
+    # 4. Construct a single, powerful UPDATE statement using SQLAlchemy Core.
+    #    This is highly efficient as it all happens in the database.
+    stmt = (
+        resources_table.update()
+        .where(resources_table.c.gateway_id == target.id)
+        .values(name=new_gateway_slug + separator + resources_table.c.custom_name_slug)
+        .execution_options(synchronize_session=False)  # Important for bulk updates
+    )
+
+    # 5. Execute the statement using the connection from the ongoing transaction.
+    connection.execute(stmt)
+
 
 class A2AAgent(Base):
     """
@@ -1643,6 +1825,71 @@ def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unu
         mapper: SQLAlchemy mapper for the Tool model.
         connection: Database connection.
         target: The Tool instance being inserted or updated.
+    """
+    # Set custom_name to original_name if not provided
+    if not target.custom_name:
+        target.custom_name = target.original_name
+    # Set display_name to custom_name if not provided
+    if not target.display_name:
+        target.display_name = target.custom_name
+    # Always update custom_name_slug from custom_name
+    target.custom_name_slug = slugify(target.custom_name)
+    # Update name field
+    gateway_slug = slugify(target.gateway.name) if target.gateway else ""
+    if gateway_slug:
+        sep = settings.gateway_tool_name_separator
+        target.name = f"{gateway_slug}{sep}{target.custom_name_slug}"
+    else:
+        target.name = target.custom_name_slug
+
+
+@event.listens_for(Prompt, "before_insert")
+@event.listens_for(Prompt, "before_update")
+def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
+    """
+    Event listener to set custom_name, custom_name_slug, and name for Prompt before insert/update.
+
+    - Sets custom_name to original_name if not provided.
+    - Calculates custom_name_slug from custom_name using slugify.
+    - Updates name to gateway_slug + separator + custom_name_slug.
+    - Sets display_name to custom_name if not provided.
+
+    Args:
+        mapper: SQLAlchemy mapper for the Prompt model.
+        connection: Database connection.
+        target: The Prompt instance being inserted or updated.
+    """
+    # Set custom_name to original_name if not provided
+    if not target.custom_name:
+        target.custom_name = target.original_name
+    # Set display_name to custom_name if not provided
+    if not target.display_name:
+        target.display_name = target.custom_name
+    # Always update custom_name_slug from custom_name
+    target.custom_name_slug = slugify(target.custom_name)
+    # Update name field
+    gateway_slug = slugify(target.gateway.name) if target.gateway else ""
+    if gateway_slug:
+        sep = settings.gateway_tool_name_separator
+        target.name = f"{gateway_slug}{sep}{target.custom_name_slug}"
+    else:
+        target.name = target.custom_name_slug
+
+@event.listens_for(Resource, "before_insert")
+@event.listens_for(Resource, "before_update")
+def set_custom_name_and_slug(mapper, connection, target):  # pylint: disable=unused-argument
+    """
+    Event listener to set custom_name, custom_name_slug, and name for Resource before insert/update.
+
+    - Sets custom_name to original_name if not provided.
+    - Calculates custom_name_slug from custom_name using slugify.
+    - Updates name to gateway_slug + separator + custom_name_slug.
+    - Sets display_name to custom_name if not provided.
+
+    Args:
+        mapper: SQLAlchemy mapper for the Resource model.
+        connection: Database connection.
+        target: The Resource instance being inserted or updated.
     """
     # Set custom_name to original_name if not provided
     if not target.custom_name:

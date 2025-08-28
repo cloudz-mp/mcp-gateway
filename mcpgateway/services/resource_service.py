@@ -50,6 +50,7 @@ from mcpgateway.observability import create_span
 from mcpgateway.schemas import ResourceCreate, ResourceMetrics, ResourceRead, ResourceSubscription, ResourceUpdate, TopPerformer
 from mcpgateway.services.logging_service import LoggingService
 from mcpgateway.utils.metrics_common import build_top_performers
+from mcpgateway.utils.create_slug import slugify
 
 # Plugin support imports (conditional)
 try:
@@ -280,6 +281,8 @@ class ResourceService:
             db_resource = DbResource(
                 uri=resource.uri,
                 name=resource.name,
+                custom_name=resource.name,
+                custom_name_slug=slugify(resource.name),
                 description=resource.description,
                 mime_type=mime_type,
                 template=resource.template,

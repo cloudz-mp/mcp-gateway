@@ -38,6 +38,7 @@ from mcpgateway.plugins.framework import GlobalContext, PluginManager, PluginVio
 from mcpgateway.schemas import PromptCreate, PromptRead, PromptUpdate, TopPerformer
 from mcpgateway.services.logging_service import LoggingService
 from mcpgateway.utils.metrics_common import build_top_performers
+from mcpgateway.utils.create_slug import slugify
 
 # Initialize logging service first
 logging_service = LoggingService()
@@ -310,6 +311,8 @@ class PromptService:
             # Create DB model
             db_prompt = DbPrompt(
                 name=prompt.name,
+                custom_name=prompt.name,
+                custom_name_slug=slugify(prompt.name),
                 description=prompt.description,
                 template=prompt.template,
                 argument_schema=argument_schema,

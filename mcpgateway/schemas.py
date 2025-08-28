@@ -1384,6 +1384,8 @@ class ResourceRead(BaseModelWithConfigDict):
     updated_at: datetime
     is_active: bool
     metrics: ResourceMetrics
+    custom_name: str
+    custom_name_slug: str
     tags: List[str] = Field(default_factory=list, description="Tags for categorizing the resource")
 
     # Comprehensive metadata for audit tracking
@@ -1855,6 +1857,8 @@ class PromptRead(BaseModelWithConfigDict):
     created_at: datetime
     updated_at: datetime
     is_active: bool
+    custom_name: str
+    custom_name_slug: str
     tags: List[str] = Field(default_factory=list, description="Tags for categorizing the prompt")
     metrics: PromptMetrics
 
