@@ -26,6 +26,7 @@ from mcpgateway.db import A2AAgentMetric
 from mcpgateway.schemas import A2AAgentCreate, A2AAgentMetrics, A2AAgentRead, A2AAgentUpdate
 from mcpgateway.services.logging_service import LoggingService
 from mcpgateway.services.team_management_service import TeamManagementService
+from mcpgateway.config import settings
 
 # Initialize logging service first
 logging_service = LoggingService()
@@ -516,7 +517,7 @@ class A2AAgentService:
                 elif agent.auth_type == "bearer" and agent.auth_value:
                     headers["Authorization"] = f"Bearer {agent.auth_value}"
 
-                http_response = await client.post(agent.endpoint_url, json=request_data, headers=headers)
+                http_response = await client.post(agent.endpoint_url, json=request_data, headers=headers, timeout=settings.mcpgateway_a2a_default_timeout)
 
                 if http_response.status_code == 200:
                     response = http_response.json()
