@@ -11,7 +11,7 @@ global:
 # MCP CONTEXT-FORGE (Gateway / API tier)
 ########################################################################
 mcpContextForge:
-  replicaCount: 2                           # horizontal scaling for the gateway
+  replicaCount: 1                           # horizontal scaling for the gateway
 
   # --- HORIZONTAL POD AUTOSCALER --------------------------------------
   # * Percentages compare live usage with the container *request* values
@@ -20,7 +20,7 @@ mcpContextForge:
   #   triggers a scale event.
   # --------------------------------------------------------------------
   hpa:
-    enabled: true                           # Set to false to keep a fixed replica count
+    enabled: false                           # Set to false to keep a fixed replica count
     minReplicas: 2                          # Never scale below this
     maxReplicas: 10                         # Never scale above this
     targetCPUUtilizationPercentage: 90      # Scale up when avg CPU > 90 % of *request*
@@ -28,7 +28,7 @@ mcpContextForge:
 
   image:
     repository: ghcr.io/ibm/mcp-context-forge
-    tag: latest                 # pin a specific immutable tag in production
+    tag: 0.7.0                 # pin a specific immutable tag in production
     #pullPolicy: IfNotPresent
     pullPolicy: Always          # always pull the latest image; useful for dev/testing
 
@@ -82,7 +82,7 @@ mcpContextForge:
   ingress:
     enabled: true
     className: nginx
-    host: gateway.local         # CHANGE to your FQDN (e.g. api.example.com)
+    host: mcp-gateway.api.skapim.com         # CHANGE to your FQDN (e.g. api.example.com)
     path: /
     pathType: Prefix
     annotations:
@@ -204,7 +204,7 @@ mcpContextForge:
     COOKIE_SAMESITE: lax             # cookie SameSite attribute
 
     # ─ Logging ─
-    LOG_LEVEL: INFO                  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    LOG_LEVEL: DEBUG                  # DEBUG, INFO, WARNING, ERROR, CRITICAL
     LOG_FORMAT: json                 # json or text format
     LOG_TO_FILE: "false"             # enable file logging
     LOG_REQUESTS: "false"            # enable request payload logging with sensitive data masking
@@ -353,8 +353,8 @@ mcpContextForge:
   secret:
     # ─ Admin & auth ─
     BASIC_AUTH_USER: admin                 # username for basic-auth login
-    BASIC_AUTH_PASSWORD: changeme          # password for basic-auth (CHANGE IN PROD!)
-    AUTH_REQUIRED: "true"                  # enforce authentication globally (true/false)
+    BASIC_AUTH_PASSWORD: admin          # password for basic-auth (CHANGE IN PROD!)
+    AUTH_REQUIRED: "false"                  # enforce authentication globally (true/false)
     JWT_SECRET_KEY: my-test-key            # secret key used to sign JWT tokens
     JWT_ALGORITHM: HS256                   # signing algorithm for JWT tokens
     JWT_AUDIENCE: mcpgateway-api           # JWT audience claim for token validation
@@ -365,8 +365,8 @@ mcpContextForge:
 
     # ─ Email-Based Authentication ─
     EMAIL_AUTH_ENABLED: "true"             # enable email-based authentication system
-    PLATFORM_ADMIN_EMAIL: admin@example.com # email for bootstrap platform admin user
-    PLATFORM_ADMIN_PASSWORD: changeme     # password for bootstrap platform admin user
+    PLATFORM_ADMIN_EMAIL: admin@admin.com # email for bootstrap platform admin user
+    PLATFORM_ADMIN_PASSWORD: admin!23$     # password for bootstrap platform admin user
     PLATFORM_ADMIN_FULL_NAME: Platform Administrator # full name for bootstrap platform admin
 
     # ─ Password Hashing & Security ─
@@ -489,7 +489,7 @@ mcpContextForge:
     OTEL_RESOURCE_ATTRIBUTES: ""           # resource attributes (comma-separated key=value)
 
     # ─ Documentation & UI Settings (Sensitive) ─
-    DOCS_ALLOW_BASIC_AUTH: "false"         # allow basic auth for docs endpoints
+    DOCS_ALLOW_BASIC_AUTH: "true"         # allow basic auth for docs endpoints
 
     # (derived URLs are defined in deployment-mcp.yaml)
 
@@ -521,7 +521,7 @@ migration:
   # Use same image as mcpgateway
   image:
     repository: ghcr.io/ibm/mcp-context-forge
-    tag: latest                             # Should match mcpContextForge.image.tag
+    tag: 0.7.0                             # Should match mcpContextForge.image.tag
     #pullPolicy: IfNotPresent
     pullPolicy: Always                      # always pull the latest image; useful for dev/testing
 
@@ -615,7 +615,7 @@ redis:
 
   image:
     repository: redis
-    tag: latest
+    tag: "8.2"
     pullPolicy: IfNotPresent
 
   service:
@@ -671,7 +671,7 @@ redis:
 # PGADMIN - Web UI for Postgres
 ########################################################################
 pgadmin:
-  enabled: true
+  enabled: false
 
   image:
     repository: dpage/pgadmin4
@@ -721,7 +721,7 @@ pgadmin:
 # REDIS-COMMANDER - Web UI for Redis
 ########################################################################
 redisCommander:
-  enabled: true
+  enabled: false
 
   image:
     repository: rediscommander/redis-commander
@@ -769,7 +769,7 @@ redisCommander:
 ########################################################################
 mcpFastTimeServer:
   enabled: true            # switch to true to deploy
-  replicaCount: 2
+  replicaCount: 1
   image:
     repository: ghcr.io/ibm/fast-time-server
     tag: "0.8.0"
