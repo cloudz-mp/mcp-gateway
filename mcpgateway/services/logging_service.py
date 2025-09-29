@@ -197,6 +197,11 @@ class LoggingService:
         # Clear existing handlers to avoid duplicates
         root_logger.handlers.clear()
 
+        # Set root logger level from configuration
+        log_level = getattr(logging, settings.log_level.upper())
+        root_logger.setLevel(log_level)
+        logging.debug(f"Root logger level set to {log_level}")  
+
         # Always add console/text handler for stdout/stderr
         root_logger.addHandler(_get_text_handler())
 
