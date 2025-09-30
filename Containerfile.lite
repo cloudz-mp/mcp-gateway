@@ -26,28 +26,25 @@ ARG PYTHON_VERSION=3.12
 ###########################
 # Builder stage
 ###########################
-FROM registry.access.redhat.com/ubi10/ubi:10.0-1756805986 AS builder
+FROM python:3.12-slim AS builder
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 ARG PYTHON_VERSION
 ARG ROOTFS_PATH
 
 # ----------------------------------------------------------------------------
-# 1) Patch the OS
-# 2) Install Python + headers for building wheels
-# 3) Install binutils for strip command
-# 4) Register python3 alternative
-# 5) Clean caches to reduce layer size
+# Install build dependencies and binutils for strip command
 # ----------------------------------------------------------------------------
 # hadolint ignore=DL3041
 RUN set -euo pipefail \
-    && dnf upgrade -y \
-    && dnf install -y \
-         python${PYTHON_VERSION} \
-         python${PYTHON_VERSION}-devel \
+    && apt-get update \
+    && apt-get install -y \
+         gcc \
          binutils \
-    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 \
-    && dnf clean all
+         ca-certificates \
+         procps \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -105,25 +102,19 @@ RUN python3 -OO -m compileall -q /app/.venv /app/mcpgateway /app/plugins \
     && find /app -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 # ----------------------------------------------------------------------------
-# Build a minimal, fully-patched rootfs containing only the runtime Python
-# Include ca-certificates for HTTPS connections
+# Build a minimal rootfs containing only the runtime Python
+# Since we're using python:3.12-slim as base, we'll copy the minimal runtime
 # ----------------------------------------------------------------------------
-# hadolint ignore=DL3041
 RUN set -euo pipefail \
     && mkdir -p "${ROOTFS_PATH:?}" \
-    && dnf --installroot="${ROOTFS_PATH:?}" --releasever=10 upgrade -y \
-    && dnf --installroot="${ROOTFS_PATH:?}" --releasever=10 install -y \
-         --setopt=install_weak_deps=0 \
-         --setopt=tsflags=nodocs \
-         python${PYTHON_VERSION} \
-         ca-certificates \
-         procps-ng \
-    && dnf clean all --installroot="${ROOTFS_PATH:?}"
-
-# ----------------------------------------------------------------------------
-# Create `python3` symlink in the rootfs for compatibility
-# ----------------------------------------------------------------------------
-RUN ln -sf /usr/bin/python${PYTHON_VERSION} ${ROOTFS_PATH:?}/usr/bin/python3
+    && cp -r /usr/lib/python3.12 ${ROOTFS_PATH:?}/usr/lib/ \
+    && cp -r /usr/bin/python3* ${ROOTFS_PATH:?}/usr/bin/ \
+    && cp -r /usr/share/python3.12 ${ROOTFS_PATH:?}/usr/share/ \
+    && cp -r /usr/include/python3.12 ${ROOTFS_PATH:?}/usr/include/ \
+    && cp -r /lib/x86_64-linux-gnu/libpython3.12.so.1.0 ${ROOTFS_PATH:?}/lib/x86_64-linux-gnu/ \
+    && cp -r /usr/lib/x86_64-linux-gnu/libpython3.12.so.1.0 ${ROOTFS_PATH:?}/usr/lib/x86_64-linux-gnu/ \
+    && mkdir -p ${ROOTFS_PATH:?}/lib/x86_64-linux-gnu \
+    && mkdir -p ${ROOTFS_PATH:?}/usr/lib/x86_64-linux-gnu
 
 # ----------------------------------------------------------------------------
 # Clean up unnecessary files from rootfs (if they exist)
@@ -153,26 +144,22 @@ RUN set -euo pipefail \
 
 # ----------------------------------------------------------------------------
 # Remove package managers and unnecessary system tools from rootfs
-# - Keep RPM database for security scanning with Trivy/Dockle
-# - This keeps the final image size minimal while allowing vulnerability scanning
+# - Remove apt/dpkg related files for minimal image
 # ----------------------------------------------------------------------------
-RUN rm -rf ${ROOTFS_PATH:?}/usr/bin/dnf* \
-    ${ROOTFS_PATH:?}/usr/bin/yum* \
-    ${ROOTFS_PATH:?}/usr/bin/rpm* \
-    ${ROOTFS_PATH:?}/usr/bin/microdnf \
-    ${ROOTFS_PATH:?}/usr/lib/rpm \
-    ${ROOTFS_PATH:?}/usr/lib/dnf \
-    ${ROOTFS_PATH:?}/usr/lib/yum* \
-    ${ROOTFS_PATH:?}/etc/dnf \
-    ${ROOTFS_PATH:?}/etc/yum*
+RUN rm -rf ${ROOTFS_PATH:?}/usr/bin/apt* \
+    ${ROOTFS_PATH:?}/usr/bin/dpkg* \
+    ${ROOTFS_PATH:?}/var/lib/apt \
+    ${ROOTFS_PATH:?}/var/lib/dpkg \
+    ${ROOTFS_PATH:?}/etc/apt
 
 # ----------------------------------------------------------------------------
 # Strip unneeded symbols from shared libraries and remove binutils
 # - This reduces the final image size and removes the build tool in one step
 # ----------------------------------------------------------------------------
-RUN find "${ROOTFS_PATH:?}/usr/lib64" -name '*.so*' -exec strip --strip-unneeded {} + 2>/dev/null || true \
-    && dnf remove -y binutils \
-    && dnf clean all
+RUN find "${ROOTFS_PATH:?}/usr/lib" -name '*.so*' -exec strip --strip-unneeded {} + 2>/dev/null || true \
+    && apt-get remove -y binutils \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------------------------------------------------------
 # Remove setuid/setgid binaries for security

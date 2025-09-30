@@ -120,6 +120,7 @@ async def get_current_user_with_permissions(
 
         # Extract user from token using the email auth function
         user = await get_current_user(credentials, db)
+        logger.debug(f"User: {user}")
 
         # Add request context for permission auditing
         return {
@@ -198,8 +199,10 @@ def require_permission(permission: str, resource_type: Optional[str] = None):
                 HTTPException: If user authentication or permission check fails
             """
             # Extract user context from kwargs
+            logger.debug(f"require_permission: {permission}")
             user_context = None
             for _, value in kwargs.items():
+                logger.debug(f"require_permission value: {value}")
                 if isinstance(value, dict) and "email" in value and "db" in value:
                     user_context = value
                     break
@@ -207,6 +210,7 @@ def require_permission(permission: str, resource_type: Optional[str] = None):
             if not user_context:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User authentication required")
 
+            logger.debug(f"require_permission user_context: {user_context}")
             # Create permission service and check permission
             permission_service = PermissionService(user_context["db"])
 
@@ -222,6 +226,8 @@ def require_permission(permission: str, resource_type: Optional[str] = None):
                 ip_address=user_context.get("ip_address"),
                 user_agent=user_context.get("user_agent"),
             )
+
+            logger.debug(f"require_permission granted: {granted}")
 
             if not granted:
                 logger.warning(f"Permission denied: user={user_context['email']}, permission={permission}, resource_type={resource_type}")

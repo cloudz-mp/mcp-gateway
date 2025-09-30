@@ -99,6 +99,7 @@ class PermissionService:
             True
         """
         try:
+            logging.debug(f"check_permission: {user_email}, {permission}, {resource_type}, {resource_id}, {team_id}, {ip_address}, {user_agent}")
             # First check if user is admin (bypass all permission checks)
             if await self._is_user_admin(user_email):
                 return True

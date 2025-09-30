@@ -1,19 +1,15 @@
-FROM registry.access.redhat.com/ubi10-minimal:10.0-1755721767
+FROM python:3.12-slim
 LABEL maintainer="Mihai Criveti" \
       name="mcp/mcpgateway" \
       version="0.7.0" \
       description="MCP Gateway: An enterprise-ready Model Context Protocol Gateway"
 
-ARG PYTHON_VERSION=3.12
-
-# Install Python and build dependencies
+# Install additional build dependencies
 # hadolint ignore=DL3041
-RUN microdnf update -y && \
-    microdnf install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-devel gcc git && \
-    microdnf clean all
-
-# Set default python3 to the specified version
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
+RUN apt-get update && \
+    apt-get install -y gcc git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
