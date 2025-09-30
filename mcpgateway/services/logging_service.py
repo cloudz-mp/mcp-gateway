@@ -221,16 +221,17 @@ class LoggingService:
         root_logger = logging.getLogger()
         self._loggers[""] = root_logger
 
+        log_level_enum = LogLevel(settings.log_level.lower())
+        await self.set_level(log_level_enum)
+        logging.debug(f"logger level set to {settings.log_level}")
+
         # Clear existing handlers to avoid duplicates
         root_logger.handlers.clear()
 
-        # Set root logger level from configuration
-        log_level = getattr(logging, settings.log_level.upper())
-        root_logger.setLevel(log_level)
-        logging.debug(f"Root logger level set to {log_level}")  
 
         # Always add console/text handler for stdout/stderr
         root_logger.addHandler(_get_text_handler())
+        logging.info("added text handler")
 
         # Only add file handler if enabled
         if settings.log_to_file and settings.log_file:
@@ -250,7 +251,7 @@ class LoggingService:
         self._configure_uvicorn_loggers()
 
         # Initialize log storage if admin UI is enabled
-        if settings.mcpgateway_ui_enabled or settings.mcpgateway_admin_api_enabled:
+        if settings.mcpgateway_ui_enabled and settings.mcpgateway_admin_api_enabled:
             self._storage = LogStorageService()
 
             # Add storage handler to capture all logs
