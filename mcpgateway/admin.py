@@ -7900,6 +7900,10 @@ async def get_aggregated_metrics(
             "prompts": await prompt_service.get_top_prompts(db, limit=None),
             "servers": await server_service.get_top_servers(db, limit=None),
         },
+        "topErrorPerformers": {
+            "tools": await tool_service.get_top_error_tools(db, limit=5),
+            "servers": await server_service.get_top_error_servers(db, limit=5),
+        },
     }
     return metrics
 

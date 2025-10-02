@@ -188,6 +188,63 @@ class ServerService:
 
         return build_top_performers(results)
 
+    async def get_top_error_servers(self, db: Session, limit: int = 5) -> List[TopPerformer]:
+        """Retrieve the top servers with highest error rates based on failure count.
+
+        Queries the database to get servers with their metrics, ordered by error rate
+        (failure percentage) in descending order. Returns a list of TopPerformer objects
+        containing server details and performance metrics.
+
+        Args:
+            db (Session): Database session for querying server metrics.
+            limit (int): Maximum number of servers to return. Defaults to 5.
+
+        Returns:
+            List[TopPerformer]: A list of TopPerformer objects, each containing:
+                - id: Server ID.
+                - name: Server name.
+                - execution_count: Total number of executions.
+                - avg_response_time: Average response time in seconds, or None if no metrics.
+                - success_rate: Success rate percentage, or None if no metrics.
+                - last_execution: Timestamp of the last execution, or None if no metrics.
+        """
+        results = (
+            db.query(
+                DbServer.id,
+                DbServer.name,
+                func.count(ServerMetric.id).label("execution_count"),  # pylint: disable=not-callable
+                func.avg(ServerMetric.response_time).label("avg_response_time"),  # pylint: disable=not-callable
+                case(
+                    (
+                        func.count(ServerMetric.id) > 0,  # pylint: disable=not-callable
+                        func.sum(case((ServerMetric.is_success.is_(True), 1), else_=0)).cast(Float) / func.count(ServerMetric.id) * 100,  # pylint: disable=not-callable
+                    ),
+                    else_=None,
+                ).label("success_rate"),
+                func.max(ServerMetric.timestamp).label("last_execution"),  # pylint: disable=not-callable
+            )
+            .outerjoin(ServerMetric)
+            .group_by(DbServer.id, DbServer.name)
+            .having(func.count(ServerMetric.id) > 0)  # Only include servers with executions
+            .order_by(
+                # Order by error rate (100 - success_rate) descending
+                desc(
+                    case(
+                        (
+                            func.count(ServerMetric.id) > 0,  # pylint: disable=not-callable
+                            100 - (func.sum(case((ServerMetric.is_success.is_(True), 1), else_=0)).cast(Float) / func.count(ServerMetric.id) * 100),  # pylint: disable=not-callable
+                        ),
+                        else_=0,
+                    )
+                ),
+                desc("execution_count")  # Secondary sort by execution count
+            )
+            .limit(limit)
+            .all()
+        )
+
+        return build_top_performers(results)
+
     def _convert_server_to_read(self, server: DbServer) -> ServerRead:
         """
         Converts a DbServer instance into a ServerRead model, including aggregated metrics.
