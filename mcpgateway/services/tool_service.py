@@ -284,6 +284,62 @@ class ToolService:
             return None
         team = db.query(EmailTeam).filter(EmailTeam.id == team_id, EmailTeam.is_active.is_(True)).first()
         return team.name if team else None
+    async def get_top_error_tools(self, db: Session, limit: int = 5) -> List[TopPerformer]:
+        """Retrieve the top tools with highest error rates based on failure count.
+
+        Queries the database to get tools with their metrics, ordered by error rate
+        (failure percentage) in descending order. Returns a list of TopPerformer objects
+        containing tool details and performance metrics.
+
+        Args:
+            db (Session): Database session for querying tool metrics.
+            limit (int): Maximum number of tools to return. Defaults to 5.
+
+        Returns:
+            List[TopPerformer]: A list of TopPerformer objects, each containing:
+                - id: Tool ID.
+                - name: Tool name.
+                - execution_count: Total number of executions.
+                - avg_response_time: Average response time in seconds, or None if no metrics.
+                - success_rate: Success rate percentage, or None if no metrics.
+                - last_execution: Timestamp of the last execution, or None if no metrics.
+        """
+        results = (
+            db.query(
+                DbTool.id,
+                DbTool.name,
+                func.count(ToolMetric.id).label("execution_count"),  # pylint: disable=not-callable
+                func.avg(ToolMetric.response_time).label("avg_response_time"),  # pylint: disable=not-callable
+                case(
+                    (
+                        func.count(ToolMetric.id) > 0,  # pylint: disable=not-callable
+                        func.sum(case((ToolMetric.is_success.is_(True), 1), else_=0)).cast(Float) / func.count(ToolMetric.id) * 100,  # pylint: disable=not-callable
+                    ),
+                    else_=None,
+                ).label("success_rate"),
+                func.max(ToolMetric.timestamp).label("last_execution"),  # pylint: disable=not-callable
+            )
+            .outerjoin(ToolMetric)
+            .group_by(DbTool.id, DbTool.name)
+            .having(func.count(ToolMetric.id) > 0)  # Only include tools with executions
+            .order_by(
+                # Order by error rate (100 - success_rate) descending
+                desc(
+                    case(
+                        (
+                            func.count(ToolMetric.id) > 0,  # pylint: disable=not-callable
+                            100 - (func.sum(case((ToolMetric.is_success.is_(True), 1), else_=0)).cast(Float) / func.count(ToolMetric.id) * 100),  # pylint: disable=not-callable
+                        ),
+                        else_=0,
+                    )
+                ),
+                desc("execution_count")  # Secondary sort by execution count
+            )
+            .limit(limit)
+            .all()
+        )
+
+        return build_top_performers(results)
 
     def _convert_tool_to_read(self, tool: DbTool) -> ToolRead:
         """Converts a DbTool instance into a ToolRead model, including aggregated metrics and

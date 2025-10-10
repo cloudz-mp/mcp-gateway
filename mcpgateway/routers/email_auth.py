@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 from mcpgateway.auth import get_current_user
 from mcpgateway.config import settings
 from mcpgateway.db import EmailUser, SessionLocal
-from mcpgateway.middleware.rbac import require_permission
+from mcpgateway.middleware.rbac import get_current_user_with_permissions, require_permission
 from mcpgateway.schemas import (
     AuthenticationResponse,
     AuthEventResponse,
@@ -467,7 +467,7 @@ async def list_all_auth_events(limit: int = 100, offset: int = 0, user_email: Op
 
 @email_auth_router.post("/admin/users", response_model=EmailUserResponse, status_code=status.HTTP_201_CREATED)
 @require_permission("admin.user_management")
-async def create_user(user_request: EmailRegistrationRequest, current_user: EmailUser = Depends(get_current_user), db: Session = Depends(get_db)):
+async def create_user(user_request: EmailRegistrationRequest, current_user: dict = Depends(get_current_user_with_permissions), db: Session = Depends(get_db)):
     """Create a new user account (admin only).
 
     Args:
@@ -498,11 +498,12 @@ async def create_user(user_request: EmailRegistrationRequest, current_user: Emai
             email=user_request.email,
             password=user_request.password,
             full_name=user_request.full_name,
-            is_admin=getattr(user_request, "is_admin", False),
+            is_admin=getattr(user_request, "is_admin", True),
             auth_provider="local",
         )
+        logger.info(f"Current user: {current_user}")
 
-        logger.info(f"Admin {current_user.email} created user: {user.email}")
+        logger.info(f"Admin {current_user['email']} created user: {user.email}")
 
         return EmailUserResponse.from_email_user(user)
 
@@ -601,7 +602,7 @@ async def update_user(user_email: str, user_request: EmailRegistrationRequest, c
 
 @email_auth_router.delete("/admin/users/{user_email}", response_model=SuccessResponse)
 @require_permission("admin.user_management")
-async def delete_user(user_email: str, current_user: EmailUser = Depends(get_current_user), db: Session = Depends(get_db)):
+async def delete_user(user_email: str, current_user= Depends(get_current_user_with_permissions), db: Session = Depends(get_db)):
     """Delete/deactivate user (admin only).
 
     Args:
@@ -618,18 +619,13 @@ async def delete_user(user_email: str, current_user: EmailUser = Depends(get_cur
     auth_service = EmailAuthService(db)
 
     try:
-        # Prevent admin from deleting themselves
-        if user_email == current_user.email:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete your own account")
-
         # Prevent deleting the last active admin user
         if await auth_service.is_last_active_admin(user_email):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete the last remaining admin user")
 
         # Hard delete using auth service
         await auth_service.delete_user(user_email)
-
-        logger.info(f"Admin {current_user.email} deleted user: {user_email}")
+        logger.info(f"Admin {current_user['email']} deleted user: {user_email}")
 
         return SuccessResponse(success=True, message=f"User {user_email} has been deleted")
 

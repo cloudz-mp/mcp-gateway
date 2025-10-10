@@ -1346,14 +1346,14 @@ async def list_servers(
     # Get user email for team filtering
     user_email = get_user_email(user)
     # Use team-filtered server listing
-    if team_id or visibility:
-        data = await server_service.list_servers_for_user(db=db, user_email=user_email, team_id=team_id, visibility=visibility, include_inactive=include_inactive)
-        # Apply tag filtering to team-filtered results if needed
-        if tags_list:
-            data = [server for server in data if any(tag in server.tags for tag in tags_list)]
-    else:
-        # Use existing method for backward compatibility when no team filtering
-        data = await server_service.list_servers(db, include_inactive=include_inactive, tags=tags_list)
+    # if team_id or visibility:
+    data = await server_service.list_servers_for_user(db=db, user_email=user_email, team_id=team_id, visibility=visibility, include_inactive=include_inactive)
+    # Apply tag filtering to team-filtered results if needed
+    if tags_list:
+        data = [server for server in data if any(tag in server.tags for tag in tags_list)]
+    # else:
+    #     # Use existing method for backward compatibility when no team filtering
+    #     data = await server_service.list_servers(db, include_inactive=include_inactive, tags=tags_list)
     return data
 
 
@@ -2088,15 +2088,15 @@ async def list_tools(
     user_email = get_user_email(user)
 
     # Use team-filtered tool listing
-    if team_id or visibility:
-        data = await tool_service.list_tools_for_user(db=db, user_email=user_email, team_id=team_id, visibility=visibility, include_inactive=include_inactive)
+    # if team_id or visibility:
+    data = await tool_service.list_tools_for_user(db=db, user_email=user_email, team_id=team_id, visibility=visibility, include_inactive=include_inactive)
 
-        # Apply tag filtering to team-filtered results if needed
-        if tags_list:
-            data = [tool for tool in data if any(tag in tool.tags for tag in tags_list)]
-    else:
-        # Use existing method for backward compatibility when no team filtering
-        data = await tool_service.list_tools(db, cursor=cursor, include_inactive=include_inactive, tags=tags_list)
+    # Apply tag filtering to team-filtered results if needed
+    if tags_list:
+        data = [tool for tool in data if any(tag in tool.tags for tag in tags_list)]
+    # else:
+    #     # Use existing method for backward compatibility when no team filtering
+    #     data = await tool_service.list_tools(db, cursor=cursor, include_inactive=include_inactive, tags=tags_list)
 
     if apijsonpath is None:
         return data
@@ -3065,6 +3065,9 @@ async def toggle_gateway_status(
 async def list_gateways(
     include_inactive: bool = False,
     db: Session = Depends(get_db),
+    tags: Optional[str] = None,
+    team_id: Optional[str] = Query(None, description="Filter by team ID"),
+    visibility: Optional[str] = Query(None, description="Filter by visibility: private, team, public"),
     user=Depends(get_current_user_with_permissions),
 ) -> List[GatewayRead]:
     """
@@ -3079,7 +3082,18 @@ async def list_gateways(
         List of gateway records.
     """
     logger.debug(f"User '{user}' requested list of gateways with include_inactive={include_inactive}")
-    return await gateway_service.list_gateways(db, include_inactive=include_inactive)
+    tags_list = None
+    if tags:
+        tags_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+    
+    # Get user email for team filtering
+    user_email = get_user_email(user)
+
+    data = await gateway_service.list_gateways_for_user(db=db, user_email=user_email, team_id=team_id, visibility=visibility, include_inactive=include_inactive)
+    # Apply tag filtering to team-filtered results if needed
+    if tags_list:
+        data = [gateway for gateway in data if any(tag in gateway.tags for tag in tags_list)]
+    return data
 
 
 @gateway_router.post("", response_model=GatewayRead)

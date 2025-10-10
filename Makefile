@@ -55,8 +55,8 @@ CONTAINER_MEMORY = 2048m
 CONTAINER_CPUS   = 2
 
 # Virtual-environment variables
-VENVS_DIR ?= $(HOME)/.venv
-VENV_DIR  ?= $(VENVS_DIR)/$(PROJECT_NAME)
+VENVS_DIR ?= .venv
+VENV_DIR  ?= $(VENVS_DIR)
 
 # -----------------------------------------------------------------------------
 # OS Specific
@@ -1829,8 +1829,8 @@ CONTAINER_RUNTIME ?= $(shell command -v docker >/dev/null 2>&1 && echo docker ||
 print-runtime:
 	@echo Using container runtime: $(CONTAINER_RUNTIME)
 # Base image name (without any prefix)
-IMAGE_BASE := mcpgateway/mcpgateway
-IMAGE_TAG := latest
+IMAGE_BASE := harbor.ops.action.cloudz.co.kr/apim/mcp-gateway
+IMAGE_TAG := 0.7.0
 
 # Handle runtime-specific image naming
 ifeq ($(CONTAINER_RUNTIME),podman)
@@ -2095,6 +2095,51 @@ container-health:
 	@echo "Status: $$($(CONTAINER_RUNTIME) inspect $(PROJECT_NAME) --format='{{.State.Health.Status}}' 2>/dev/null || echo 'No health check')"
 	@echo "Logs:"
 	@$(CONTAINER_RUNTIME) inspect $(PROJECT_NAME) --format='{{range .State.Health.Log}}{{.Output}}{{end}}' 2>/dev/null || true
+container-build-podman-amd:
+	@echo "🔨 Building with podman for platform linux/amd64..."
+	@echo "⚠️  Setting up cross-platform emulation..."
+	@if ! podman machine list --format json | grep -q '"Running": true'; then \
+		echo "❌ Podman machine is not running. Please start it with: podman machine start"; \
+		exit 1; \
+	fi
+	podman build \
+		--platform=linux/amd64 --security-opt seccomp=unconfined  \
+		-f $(CONTAINER_FILE) \
+		--tag $(IMAGE_BASE):$(IMAGE_TAG)-amd64 \
+		.
+	@echo "✅ Built AMD64 image: $(IMAGE_BASE):$(IMAGE_TAG)-amd64"
+	@echo "📤 Pushing AMD64 image to registry..."
+	podman push $(IMAGE_BASE):$(IMAGE_TAG)-amd64
+	@echo "✅ Pushed AMD64 image: $(IMAGE_BASE):$(IMAGE_TAG)-amd64"
+
+container-build-podman-arm:
+	@echo "🔨 Building with podman for platform linux/arm64..."
+	@echo "⚠️  Setting up cross-platform emulation..."
+	@if ! podman machine list --format json | grep -q '"Running": true'; then \
+		echo "❌ Podman machine is not running. Please start it with: podman machine start"; \
+		exit 1; \
+	fi
+	podman build \
+		--platform=linux/arm64 --security-opt seccomp=unconfined  \
+		-f $(CONTAINER_FILE) \
+		--tag $(IMAGE_BASE):$(IMAGE_TAG)-arm64 \
+		.
+	@echo "✅ Built ARM64 image: $(IMAGE_BASE):$(IMAGE_TAG)-arm64"
+	@echo "📤 Pushing ARM64 image to registry..."
+	podman push $(IMAGE_BASE):$(IMAGE_TAG)-arm64
+	@echo "✅ Pushed ARM64 image: $(IMAGE_BASE):$(IMAGE_TAG)-arm64"
+
+container-build-push-multi-podman: container-build-podman-amd container-build-podman-arm
+	@echo "🔗 Creating multi-architecture manifest..."
+	podman manifest create $(IMAGE_BASE):$(IMAGE_TAG) \
+		$(IMAGE_BASE):$(IMAGE_TAG)-amd64 \
+		$(IMAGE_BASE):$(IMAGE_TAG)-arm64
+	@echo "📤 Pushing multi-architecture manifest..."
+	podman manifest push $(IMAGE_BASE):$(IMAGE_TAG) $(IMAGE_BASE):$(IMAGE_TAG)
+	@echo "✅ Multi-architecture image pushed: $(call get_image_name)"
+	@echo "🧹 Cleaning up individual architecture images..."
+	podman rmi $(IMAGE_BASE):$(IMAGE_TAG)-amd64 $(IMAGE_BASE):$(IMAGE_TAG)-arm64 || true
+	@echo "✅ Cleanup completed"
 
 container-build-multi:
 	@echo "🔨 Building multi-architecture image..."
