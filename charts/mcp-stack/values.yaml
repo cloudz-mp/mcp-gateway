@@ -28,7 +28,7 @@ mcpContextForge:
 
   image:
     repository: ghcr.io/ibm/mcp-context-forge
-    tag: 0.7.0                 # pin a specific immutable tag in production
+    tag: 0.8.0                 # pin a specific immutable tag in production
     #pullPolicy: IfNotPresent
     pullPolicy: Always          # always pull the latest image; useful for dev/testing
 
@@ -166,7 +166,7 @@ mcpContextForge:
 
     # ─ Security & CORS ─
     ENVIRONMENT: development         # deployment environment (development/production)
-    APP_DOMAIN: localhost            # domain for production CORS origins
+    APP_DOMAIN: http://localhost            # domain for production CORS origins
     CORS_ENABLED: "true"             # enable CORS processing in gateway
     CORS_ALLOW_CREDENTIALS: "true"   # allow credentials in CORS requests
     ALLOWED_ORIGINS: '["http://localhost","http://localhost:4444"]' # JSON list of allowed origins
@@ -265,7 +265,7 @@ mcpContextForge:
     WELL_KNOWN_CACHE_MAX_AGE: "3600" # cache control for well-known files (seconds)
 
     # ─ Plugin Configuration ─
-    PLUGINS_ENABLED: "false"         # enable the plugin framework
+    PLUGINS_ENABLED: "true"         # enable the plugin framework
     PLUGIN_CONFIG_FILE: "plugins/config.yaml" # path to main plugin configuration file
     PLUGINS_CLI_COMPLETION: "false"  # enable auto-completion for plugins CLI
     PLUGINS_CLI_MARKUP_MODE: ""      # set markup mode for plugins CLI
@@ -411,7 +411,7 @@ migration:
   # Use same image as mcpgateway
   image:
     repository: ghcr.io/ibm/mcp-context-forge
-    tag: 0.7.0                             # Should match mcpContextForge.image.tag
+    tag: 0.8.0                             # Should match mcpContextForge.image.tag
     #pullPolicy: IfNotPresent
     pullPolicy: Always                      # always pull the latest image; useful for dev/testing
 
