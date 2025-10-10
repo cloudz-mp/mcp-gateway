@@ -28,7 +28,7 @@ mcpContextForge:
 
   image:
     repository: ghcr.io/ibm/mcp-context-forge
-    tag: 0.7.0                 # pin a specific immutable tag in production
+    tag: 0.8.0                 # pin a specific immutable tag in production
     #pullPolicy: IfNotPresent
     pullPolicy: Always          # always pull the latest image; useful for dev/testing
 
@@ -282,7 +282,7 @@ mcpContextForge:
     WELL_KNOWN_CACHE_MAX_AGE: "3600" # cache control for well-known files (seconds)
 
     # ─ Plugin Configuration ─
-    PLUGINS_ENABLED: "false"         # enable the plugin framework
+    PLUGINS_ENABLED: "true"         # enable the plugin framework
     PLUGIN_CONFIG_FILE: "plugins/config.yaml" # path to main plugin configuration file
     PLUGINS_MTLS_CA_BUNDLE: ""               # default CA bundle for external plugins (optional)
     PLUGINS_MTLS_CLIENT_CERT: ""             # gateway client certificate for plugin mTLS
@@ -521,7 +521,7 @@ migration:
   # Use same image as mcpgateway
   image:
     repository: ghcr.io/ibm/mcp-context-forge
-    tag: 0.7.0                             # Should match mcpContextForge.image.tag
+    tag: 0.8.0                             # Should match mcpContextForge.image.tag
     #pullPolicy: IfNotPresent
     pullPolicy: Always                      # always pull the latest image; useful for dev/testing
 
