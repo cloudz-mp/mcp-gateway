@@ -49,7 +49,7 @@ from mcpgateway.db import server_resource_association
 from mcpgateway.models import ResourceContent, ResourceTemplate, TextContent
 from mcpgateway.observability import create_span
 from mcpgateway.schemas import ResourceCreate, ResourceMetrics, ResourceRead, ResourceSubscription, ResourceUpdate, TopPerformer
-from mcpgateway.services.logging_service import LoggingService
+import logging
 from mcpgateway.utils.metrics_common import build_top_performers
 from mcpgateway.utils.sqlalchemy_modifier import json_contains_expr
 
@@ -62,9 +62,8 @@ try:
 except ImportError:
     PLUGINS_AVAILABLE = False
 
-# Initialize logging service first
-logging_service = LoggingService()
-logger = logging_service.get_logger(__name__)
+# Use standard logger to inherit root logger configuration
+logger = logging.getLogger(__name__)
 
 
 class ResourceError(Exception):

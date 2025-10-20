@@ -80,7 +80,7 @@ from mcpgateway.observability import create_span
 from mcpgateway.schemas import GatewayCreate, GatewayRead, GatewayUpdate, PromptCreate, ResourceCreate, ToolCreate
 
 # logging.getLogger("httpx").setLevel(logging.WARNING)  # Disables httpx logs for regular health checks
-from mcpgateway.services.logging_service import LoggingService
+import logging
 from mcpgateway.services.oauth_manager import OAuthManager
 from mcpgateway.services.team_management_service import TeamManagementService
 from mcpgateway.services.tool_service import ToolService
@@ -90,9 +90,8 @@ from mcpgateway.utils.retry_manager import ResilientHttpClient
 from mcpgateway.utils.services_auth import decode_auth, encode_auth
 from mcpgateway.utils.sqlalchemy_modifier import json_contains_expr
 
-# Initialize logging service first
-logging_service = LoggingService()
-logger = logging_service.get_logger(__name__)
+# Use standard logger to inherit root logger configuration
+logger = logging.getLogger(__name__)
 
 
 GW_FAILURE_THRESHOLD = settings.unhealthy_threshold
@@ -612,9 +611,14 @@ class GatewayService:  # pylint: disable=too-many-instance-attributes
                     team_id=team_id,
                     owner_email=owner_email,
                     visibility=visibility,
+                    tags=gateway.tags or [],
                 )
                 for tool in tools
             ]
+            # Log discovered tools for debugging
+            logger.debug("Discovered tools from gateway %s:", normalized_url)
+            for tool in tools:
+                logger.debug("- Tool: %s (%s), Tool tags: %s", tool.original_name, tool.description, tool.tags)
 
             # Create resource DB models
             db_resources = [
@@ -635,6 +639,7 @@ class GatewayService:  # pylint: disable=too-many-instance-attributes
                     team_id=team_id,
                     owner_email=owner_email,
                     visibility=visibility,
+                    tags=gateway.tags or [],
                 )
                 for resource in resources
             ]
@@ -657,6 +662,7 @@ class GatewayService:  # pylint: disable=too-many-instance-attributes
                     team_id=team_id,
                     owner_email=owner_email,
                     visibility=visibility,
+                    tags=gateway.tags or [],
                 )
                 for prompt in prompts
             ]

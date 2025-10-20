@@ -27,11 +27,10 @@ from sqlalchemy.orm import Session
 # First-Party
 from mcpgateway.config import settings
 from mcpgateway.db import EmailTeam, EmailTeamInvitation, EmailTeamMember, EmailUser, utc_now
-from mcpgateway.services.logging_service import LoggingService
+import logging
 
-# Initialize logging
-logging_service = LoggingService()
-logger = logging_service.get_logger(__name__)
+# Use standard logger to inherit root logger configuration
+logger = logging.getLogger(__name__)
 
 
 class TeamInvitationService:

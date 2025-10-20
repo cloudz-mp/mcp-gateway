@@ -51,7 +51,7 @@ from mcpgateway.observability import create_span
 from mcpgateway.plugins.framework import GlobalContext, HttpHeaderPayload, PluginError, PluginManager, PluginViolationError, ToolPostInvokePayload, ToolPreInvokePayload
 from mcpgateway.plugins.framework.constants import GATEWAY_METADATA, TOOL_METADATA
 from mcpgateway.schemas import ToolCreate, ToolRead, ToolUpdate, TopPerformer
-from mcpgateway.services.logging_service import LoggingService
+import logging
 from mcpgateway.services.oauth_manager import OAuthManager
 from mcpgateway.services.team_management_service import TeamManagementService
 from mcpgateway.utils.create_slug import slugify
@@ -65,9 +65,8 @@ from mcpgateway.utils.sqlalchemy_modifier import json_contains_expr
 # Local
 from ..config import extract_using_jq
 
-# Initialize logging service first
-logging_service = LoggingService()
-logger = logging_service.get_logger(__name__)
+# Use standard logger to inherit root logger configuration
+logger = logging.getLogger(__name__)
 
 
 class ToolError(Exception):
