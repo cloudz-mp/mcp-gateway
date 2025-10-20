@@ -33,14 +33,13 @@ from mcpgateway.db import Server as DbServer
 from mcpgateway.db import ServerMetric
 from mcpgateway.db import Tool as DbTool
 from mcpgateway.schemas import ServerCreate, ServerMetrics, ServerRead, ServerUpdate, TopPerformer
-from mcpgateway.services.logging_service import LoggingService
+import logging
 from mcpgateway.services.team_management_service import TeamManagementService
 from mcpgateway.utils.metrics_common import build_top_performers
 from mcpgateway.utils.sqlalchemy_modifier import json_contains_expr
 
-# Initialize logging service first
-logging_service = LoggingService()
-logger = logging_service.get_logger(__name__)
+# Use standard logger to inherit root logger configuration
+logger = logging.getLogger(__name__)
 
 
 class ServerError(Exception):
