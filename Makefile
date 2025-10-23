@@ -2096,7 +2096,7 @@ print-runtime:
 	@echo Using container runtime: $(CONTAINER_RUNTIME)
 # Base image name (without any prefix)
 IMAGE_BASE := harbor.ops.action.cloudz.co.kr/apim/mcp-gateway
-IMAGE_TAG := 0.8.0
+IMAGE_TAG := 0.8.3
 
 # Handle runtime-specific image naming
 ifeq ($(CONTAINER_RUNTIME),podman)
